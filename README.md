@@ -2,7 +2,7 @@
 
 [Paper](https://arxiv.org/abs/2505.21866) | [Project page](https://ai-iot-sensing.github.io/projects/project.html) | [Paper with code](https://paperswithcode.com/paper/csi-bench-a-large-scale-in-the-wild-dataset)
 
-A comprehensive benchmark and training system for WiFi sensing using CSI data.
+A comprehensive benchmark and training system for WiFi sensing using CSI data. Accepted and presented at [NeurIPS 2025](https://neurips.cc/virtual/2025/loc/san-diego/poster/121605).
 
 ## Overview
 
