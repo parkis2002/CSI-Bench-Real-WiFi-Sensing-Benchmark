@@ -31,7 +31,8 @@ from model.supervised.models import (
     TransformerClassifier, 
     ViTClassifier,
     PatchTST,
-    TimesFormer1D
+    TimesFormer1D,
+    AttentionGRUClassifier
 )
 
 # Import TaskTrainer
@@ -48,7 +49,8 @@ MODEL_TYPES = {
     'transformer': TransformerClassifier,
     'vit': ViTClassifier,
     'patchtst': PatchTST,
-    'timesformer1d': TimesFormer1D
+    'timesformer1d': TimesFormer1D,
+    'attentiongru': AttentionGRUClassifier
 }
 
 def main(args=None):
@@ -59,7 +61,7 @@ def main(args=None):
         parser.add_argument('--task_name', type=str, default='MotionSourceRecognition',
                             help='Name of the task to train on')
         parser.add_argument('--model', type=str, default='vit', 
-                            choices=['mlp', 'lstm', 'resnet18', 'transformer', 'vit', 'patchtst', 'timesformer1d'],
+                            choices=['mlp', 'lstm', 'resnet18', 'transformer', 'vit', 'patchtst', 'timesformer1d', 'attentiongru'],
                             help='Type of model to train')
         parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training')
         parser.add_argument('--epochs', type=int, default=30, help='Number of epochs to train')
