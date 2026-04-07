@@ -668,3 +668,73 @@ class TimesFormerBlock(nn.Module):
         x = x + self.mlp(self.norm3(x))
         
         return x
+
+class AttentionGRUClassifier(nn.Module):
+    """
+    Lightweight Attention-GRU model for WiFi sensing 
+    (Based on 'Human Activity Recognition Through Augmented WiFi CSI Signals by Lightweight Attention-GRU')
+    """
+    def __init__(self, win_len=500, feature_size=232, hidden_size=64, num_classes=2, dropout=0.3):
+        super(AttentionGRUClassifier, self).__init__()
+        
+        self.win_len = win_len
+        self.feature_size = feature_size
+        self.hidden_size = hidden_size
+        self.num_classes = num_classes
+        self.dropout = dropout
+        
+        # 1. 단일 레이어 GRU (초경량화를 위해 num_layers=1, bidirectional=False)
+        self.gru = nn.GRU(
+            input_size=feature_size,
+            hidden_size=hidden_size,
+            num_layers=1,
+            batch_first=True,
+            bidirectional=False
+        )
+        
+        # 2. Attention 모듈 (시간 축에서 중요한 특징에 가중치를 부여)
+        self.attention = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.Tanh(),
+            nn.Linear(hidden_size, 1)
+        )
+        
+        # 3. 분류기 (Classifier)
+        self.fc = nn.Sequential(
+            nn.Dropout(dropout),
+            nn.Linear(hidden_size, num_classes)
+        )
+    
+    def get_init_params(self):
+        """CSI-Bench의 모델 복제(Cloning) 및 Few-shot 러닝 지원을 위한 초기화 파라미터 반환"""
+        return {
+            'win_len': self.win_len,
+            'feature_size': self.feature_size,
+            'hidden_size': self.hidden_size,
+            'num_classes': self.num_classes,
+            'dropout': self.dropout
+        }
+        
+    def forward(self, x):
+        # 입력 차원: [batch, channels, win_len, feature_size]
+        # GRU 입력 차원: [batch, win_len, feature_size]
+        if len(x.shape) == 4:
+            x = x.squeeze(1)  # 채널 차원(channels) 제거
+            
+        # 차원 검사 및 보정 (feature_size가 마지막 차원에 오도록)
+        if x.shape[2] != self.feature_size:
+            x = x.transpose(1, 2)
+            
+        # 1. GRU 통과 -> gru_out 차원: [batch, win_len, hidden_size]
+        gru_out, _ = self.gru(x)
+        
+        # 2. Attention Score 계산 -> attn_weights 차원: [batch, win_len, 1]
+        attn_weights = F.softmax(self.attention(gru_out), dim=1)
+        
+        # 3. Context Vector 계산 (GRU 출력과 Attention 가중치의 원소별 곱셈 후 시간축 방향 합산)
+        # context 차원: [batch, hidden_size]
+        context = torch.sum(attn_weights * gru_out, dim=1)
+        
+        # 4. 최종 분류
+        out = self.fc(context)
+        return out
