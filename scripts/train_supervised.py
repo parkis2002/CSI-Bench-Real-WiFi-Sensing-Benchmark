@@ -31,8 +31,7 @@ from model.supervised.models import (
     TransformerClassifier, 
     ViTClassifier,
     PatchTST,
-    TimesFormer1D,
-    AttentionGRUClassifier
+    TimesFormer1D
 )
 
 # Import TaskTrainer
@@ -49,8 +48,7 @@ MODEL_TYPES = {
     'transformer': TransformerClassifier,
     'vit': ViTClassifier,
     'patchtst': PatchTST,
-    'timesformer1d': TimesFormer1D,
-    'attentiongru': AttentionGRUClassifier
+    'timesformer1d': TimesFormer1D
 }
 
 def main(args=None):
